@@ -1,0 +1,49 @@
+name: PHP 7.1 and Up
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  run:    
+    runs-on: ${{ matrix.operating-system }}
+    strategy:      
+      matrix:
+        operating-system: [ubuntu-16.04,ubuntu-18.04,ubuntu-20.04]
+        php-versions: ['7.1','7.2','7.3','7.4']
+    name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
+    services:
+      mysql:
+        image: mysql:5.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+            - '3306:3306'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: mbstring, intl, mysqli
+          ini-values: post_max_size=256M, short_open_tag=On
+          coverage: xdebug
+          tools: phpunit:7.5.9
+
+      - name: Check PHP Version
+        run: php -v
+
+      - name: Composer install
+        run: composer install --optimize-autoloader --prefer-dist
+      
+      - name: Install WP Tests
+        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
+        
+      - name: phpunit tests
+        run: phpunit
