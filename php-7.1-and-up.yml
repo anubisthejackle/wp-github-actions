@@ -35,7 +35,7 @@ jobs:
           extensions: mbstring, intl, mysqli
           ini-values: post_max_size=256M, short_open_tag=On
           coverage: xdebug
-          tools: phpunit:7.5.9
+          tools: phpunit:6.5.5
 
       - name: Check PHP Version
         run: php -v
